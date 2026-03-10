@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "user-service"
-version = "0.2.0"
+version = "0.3.0"
 description = "User Profile Service — stores user data (addresses, preferences) linked to Keycloak IDs"
 authors = ["Your Name <you@example.com>"]
 license = ""
@@ -14,6 +14,7 @@ uvicorn = { extras = ["standard"], version = "^0.32.0" }
 sqlalchemy = "^2.0.48"
 psycopg2-binary = "^2.9.11"
 pydantic-settings = "^2.13.1"
+strawberry-graphql = {extras = ["fastapi"], version = "^0.311.0"}
 
 [build-system]
 requires = ["poetry-core"]
