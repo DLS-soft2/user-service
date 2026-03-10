@@ -19,6 +19,8 @@ from sqlalchemy.orm import Session
 from app.models import User
 from app.graphql import UserType, UserCreateInput, UserUpdateInput
 
+# 'input' is required by Strawberry's API convention
+# pylint: disable=redefined-builtin
 
 def _model_to_type(user: User) -> UserType:
     """Convert a SQLAlchemy User model to a GraphQL UserType.
