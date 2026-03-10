@@ -8,6 +8,7 @@ environment (local dev, CI, production) sets its own env vars.
 """
 
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
@@ -22,11 +23,7 @@ class Settings(BaseSettings):
     app_name: str = "User Profile Service"
     debug: bool = True
 
-    class Config:
-        """Pydantic config — tells it to read from a .env file if one exists."""
-
-        env_file = ".env"
-
+    model_config = ConfigDict(env_file=".env")
 
 # Single settings instance used across the application
 settings = Settings()

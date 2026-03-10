@@ -6,24 +6,32 @@ linked to Keycloak user IDs. Authentication is handled by the
 API Gateway — this service handles authorization via shared RBAC decorators.
 """
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.database import engine, Base
 from app.routers import users
 
-# Create all database tables on startup. This reads all classes that
-# inherit from Base (our User model) and creates the corresponding
-# tables in PostgreSQL if they don't already exist.
-#
-# NOTE: In production, you would use a migration tool (Alembic??)
-# instead, so you can evolve your schema over time without losing data.
-# For now, this is fine for development.
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(_application: FastAPI):
+    """Startup and shutdown logic for the application.
+
+    Code before 'yield' runs on startup, code after runs on shutdown.
+    We create database tables here instead of at module level so that:
+    1. Tests can override the database before tables are created
+    2. The app doesn't crash on import if the database is unreachable
+    """
+    Base.metadata.create_all(bind=engine)
+    yield
+
 
 app = FastAPI(
     title="User Profile Service",
     description="Stores and manages user profile data for the DLS-2 food delivery platform",
     version="0.2.0",
+    lifespan=lifespan,
 )
 
 # Include the users router with a prefix. All endpoints defined in
