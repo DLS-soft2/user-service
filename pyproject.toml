@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "user-service"
-version = "0.1.0"
+version = "0.2.0"
 description = "User Profile Service — stores user data (addresses, preferences) linked to Keycloak IDs"
 authors = ["Your Name <you@example.com>"]
 license = ""
