@@ -30,6 +30,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.database import Base
 
+# pylint: disable=not-callable
 
 class User(Base):
     """User profile table.
