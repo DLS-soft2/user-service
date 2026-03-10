@@ -1,0 +1,38 @@
+# Docker Compose for local development.
+#
+# This starts two containers:
+# 1. A PostgreSQL database
+# 2. The user-service itself
+#
+# Usage:
+#   docker compose up --build     (start everything)
+#   docker compose down           (stop everything)
+#   docker compose down -v        (stop + delete database data)
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: userdb
+    ports:
+      - "5432:5432"
+    volumes:
+      # Named volume keeps your data between restarts.
+      # Use 'docker compose down -v' to wipe it clean.
+      - pgdata:/var/lib/postgresql/data
+
+  user-service:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      # This overrides the default in config.py.
+      # 'db' is the hostname of the postgres container (Docker networking).
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/userdb
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
