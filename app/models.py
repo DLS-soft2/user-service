@@ -32,6 +32,9 @@ from app.database import Base
 
 # pylint: disable=not-callable
 
+# SQLAlchemy models trigger false positives in Pylint
+# pylint: disable=not-callable, too-few-public-methods
+
 class User(Base):
     """User profile table.
 
