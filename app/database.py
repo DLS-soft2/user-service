@@ -26,6 +26,8 @@ engine = create_engine(settings.database_url, pool_pre_ping=True)
 # a new database session. We use one session per API request.
 # autocommit=False means we control when changes are saved (explicit commits).
 # autoflush=False means we control when SQLAlchemy syncs with the database.
+
+# pylint: disable=invalid-name
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base class for all database models. Every table we define will
