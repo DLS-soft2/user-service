@@ -17,7 +17,7 @@ async def lifespan(_application: FastAPI):
 app = FastAPI(
     title="User Profile Service",
     description="Stores and manages user profile data for the DLS-2 food delivery platform",
-    version="0.3.1",
+    version="0.4.0",
     lifespan=lifespan,
 )
 
