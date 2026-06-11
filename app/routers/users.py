@@ -1,20 +1,8 @@
-"""
-User profile endpoints.
-
-Implements CRUD (Create, Read, Update, Delete) operations for user profiles.
-Each endpoint uses FastAPI's dependency injection to get a database session
-via the get_db dependency — we don't create sessions manually.
-
-All endpoints are prefixed with /v1/users (set in main.py when including
-the router). The /v1/ prefix is our API versioning strategy — if we ever
-need breaking changes, we create /v2/ endpoints while keeping /v1/ alive.
-"""
-
 from uuid import UUID
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from auth_lib import require_permission, Permission
 
 from app.database import get_db
 from app.models import User
@@ -24,6 +12,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@require_permission(Permission.USERS_UPDATE)
 def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     """Create a new user profile.
 
@@ -59,19 +48,21 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.get("/", response_model=List[UserResponse])
+@router.get("/", response_model=list[UserResponse])
+@require_permission(Permission.USERS_READ)
 def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get all user profiles with pagination.
 
     skip and limit provide basic pagination:
-    - GET /v1/users/?skip=0&limit=10  → first 10 users
-    - GET /v1/users/?skip=10&limit=10 → next 10 users
+    - GET /api/v1/users/?skip=0&limit=10  → first 10 users
+    - GET /api/v1/users/?skip=10&limit=10 → next 10 users
     """
     users = db.query(User).offset(skip).limit(limit).all()
     return users
 
 
 @router.get("/{user_id}", response_model=UserResponse)
+@require_permission(Permission.USERS_READ)
 def get_user(user_id: UUID, db: Session = Depends(get_db)):
     """Get a single user profile by ID."""
     user = db.query(User).filter(User.id == user_id).first()
@@ -84,6 +75,7 @@ def get_user(user_id: UUID, db: Session = Depends(get_db)):
 
 
 @router.get("/keycloak/{keycloak_id}", response_model=UserResponse)
+@require_permission(Permission.USERS_READ)
 def get_user_by_keycloak_id(keycloak_id: str, db: Session = Depends(get_db)):
     """Get a user profile by their Keycloak ID.
 
@@ -101,6 +93,7 @@ def get_user_by_keycloak_id(keycloak_id: str, db: Session = Depends(get_db)):
 
 
 @router.put("/{user_id}", response_model=UserResponse)
+@require_permission(Permission.USERS_UPDATE)
 def update_user(user_id: UUID, user_data: UserUpdate, db: Session = Depends(get_db)):
     """Update an existing user profile.
 
@@ -127,6 +120,7 @@ def update_user(user_id: UUID, user_data: UserUpdate, db: Session = Depends(get_
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@require_permission(Permission.USERS_READ)
 def delete_user(user_id: UUID, db: Session = Depends(get_db)):
     """Delete a user profile.
 

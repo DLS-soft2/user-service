@@ -1,15 +1,3 @@
-"""
-User Profile Service — main application entry point.
-
-Manages user profile data (delivery addresses, preferences)
-linked to Keycloak user IDs. Authentication is handled by the
-API Gateway — this service handles authorization via shared RBAC decorators.
-
-This service exposes TWO API types:
-- REST  (under /v1/users/)  — standard CRUD endpoints
-- GraphQL (under /graphql)  — flexible queries for the frontend
-"""
-
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -29,12 +17,11 @@ async def lifespan(_application: FastAPI):
 app = FastAPI(
     title="User Profile Service",
     description="Stores and manages user profile data for the DLS-2 food delivery platform",
-    version="0.3.0",
+    version="0.3.1",
     lifespan=lifespan,
 )
 
-# REST endpoints — standard CRUD under /v1/users/
-app.include_router(users.router, prefix="/v1/users", tags=["users"])
+app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 
 # GraphQL endpoint — available at /graphql with interactive GraphiQL playground
 app.include_router(graphql_router, prefix="/graphql", tags=["graphql"])

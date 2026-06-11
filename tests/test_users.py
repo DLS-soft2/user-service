@@ -1,13 +1,4 @@
-"""
-Tests for user profile CRUD endpoints.
-
-Each test function tests one specific behavior. The naming convention
-is test_<what_it_does> — its easy to see what broke when
-a test fails.
-
-The 'client' and 'sample_user_data' fixtures come from conftest.py
-and are injected automatically by pytest.
-"""
+AUTH_HEADERS = {"x-user-id": "test-user", "x-user-roles": "customer"}
 
 
 def test_root_endpoint(client):
@@ -28,7 +19,7 @@ def test_health_endpoint(client):
 
 def test_create_user(client, sample_user_data):
     """Test creating a new user profile."""
-    response = client.post("/v1/users/", json=sample_user_data)
+    response = client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
     assert response.status_code == 201
 
     data = response.json()
@@ -43,33 +34,33 @@ def test_create_user(client, sample_user_data):
 def test_create_duplicate_user(client, sample_user_data):
     """Test that creating a user with an existing keycloak_id fails."""
     # Create the user first
-    client.post("/v1/users/", json=sample_user_data)
+    client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
 
     # Try to create the same user again — should get 409 Conflict
-    response = client.post("/v1/users/", json=sample_user_data)
+    response = client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
     assert response.status_code == 409
 
 
 def test_get_all_users(client, sample_user_data):
     """Test listing all users."""
     # Create two users
-    client.post("/v1/users/", json=sample_user_data)
+    client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
     second_user = sample_user_data.copy()
     second_user["keycloak_id"] = "kc-test-user-002"
     second_user["email"] = "test2@example.com"
-    client.post("/v1/users/", json=second_user)
+    client.post("/api/v1/users/", json=second_user, headers=AUTH_HEADERS)
 
-    response = client.get("/v1/users/")
+    response = client.get("/api/v1/users/", headers=AUTH_HEADERS)
     assert response.status_code == 200
     assert len(response.json()) == 2
 
 
 def test_get_user_by_id(client, sample_user_data):
     """Test fetching a single user by their UUID."""
-    create_response = client.post("/v1/users/", json=sample_user_data)
+    create_response = client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
     user_id = create_response.json()["id"]
 
-    response = client.get(f"/v1/users/{user_id}")
+    response = client.get(f"/api/v1/users/{user_id}", headers=AUTH_HEADERS)
     assert response.status_code == 200
     assert response.json()["email"] == sample_user_data["email"]
 
@@ -77,27 +68,27 @@ def test_get_user_by_id(client, sample_user_data):
 def test_get_user_not_found(client):
     """Test that fetching a non-existent user returns 404."""
     fake_id = "00000000-0000-0000-0000-000000000000"
-    response = client.get(f"/v1/users/{fake_id}")
+    response = client.get(f"/api/v1/users/{fake_id}", headers=AUTH_HEADERS)
     assert response.status_code == 404
 
 
 def test_get_user_by_keycloak_id(client, sample_user_data):
     """Test fetching a user by their Keycloak ID (the most common lookup)."""
-    client.post("/v1/users/", json=sample_user_data)
+    client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
 
-    response = client.get(f"/v1/users/keycloak/{sample_user_data['keycloak_id']}")
+    response = client.get(f"/api/v1/users/keycloak/{sample_user_data['keycloak_id']}", headers=AUTH_HEADERS)
     assert response.status_code == 200
     assert response.json()["email"] == sample_user_data["email"]
 
 
 def test_update_user(client, sample_user_data):
     """Test updating a user's profile (partial update)."""
-    create_response = client.post("/v1/users/", json=sample_user_data)
+    create_response = client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
     user_id = create_response.json()["id"]
 
     # Only update the phone number — other fields should stay the same
     update_data = {"phone": "+45 87654321"}
-    response = client.put(f"/v1/users/{user_id}", json=update_data)
+    response = client.put(f"/api/v1/users/{user_id}", json=update_data, headers=AUTH_HEADERS)
 
     assert response.status_code == 200
     assert response.json()["phone"] == "+45 87654321"
@@ -107,13 +98,13 @@ def test_update_user(client, sample_user_data):
 
 def test_delete_user(client, sample_user_data):
     """Test deleting a user profile."""
-    create_response = client.post("/v1/users/", json=sample_user_data)
+    create_response = client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
     user_id = create_response.json()["id"]
 
     # Delete the user
-    delete_response = client.delete(f"/v1/users/{user_id}")
+    delete_response = client.delete(f"/api/v1/users/{user_id}", headers=AUTH_HEADERS)
     assert delete_response.status_code == 204
 
     # Verify the user is gone
-    get_response = client.get(f"/v1/users/{user_id}")
+    get_response = client.get(f"/api/v1/users/{user_id}", headers=AUTH_HEADERS)
     assert get_response.status_code == 404

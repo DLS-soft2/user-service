@@ -1,13 +1,6 @@
-"""
-Tests for GraphQL queries and mutations.
-
-GraphQL requests are always POST to /graphql with a JSON body
-containing the query string. The response always has a 'data'
-field (and optionally an 'errors' field if something went wrong).
-"""
-
-
 GRAPHQL_URL = "/graphql"
+
+AUTH_HEADERS = {"x-user-id": "test-user", "x-user-roles": "customer"}
 
 
 def _create_test_user(client):
@@ -19,14 +12,14 @@ def _create_test_user(client):
         "phone": "+45 11111111",
         "default_address": "GraphQL Street 1, 2100 Copenhagen",
     }
-    response = client.post("/v1/users/", json=user_data)
+    response = client.post("/api/v1/users/", json=user_data, headers=AUTH_HEADERS)
     return response.json()
 
 
 def test_query_all_users(client, sample_user_data):
     """Test querying all users via GraphQL."""
     # First create a user via REST
-    client.post("/v1/users/", json=sample_user_data)
+    client.post("/api/v1/users/", json=sample_user_data, headers=AUTH_HEADERS)
 
     # Then query via GraphQL
     query = """
