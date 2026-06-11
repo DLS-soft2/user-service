@@ -1,14 +1,3 @@
-"""
-Test configuration and shared fixtures.
-
-This sets up a test database using SQLite in memory instead of PostgreSQL.
-Why? Because tests should be fast and not depend on external services.
-You don't want to need a running PostgreSQL just to run your tests.
-
-SQLite in-memory means the database only exists while the test runs
-and disappears afterwards — no cleanup needed.
-"""
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
