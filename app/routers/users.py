@@ -120,7 +120,7 @@ def update_user(user_id: UUID, user_data: UserUpdate, db: Session = Depends(get_
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-@require_permission(Permission.USERS_READ)
+@require_permission(Permission.USERS_UPDATE)
 def delete_user(user_id: UUID, db: Session = Depends(get_db)):
     """Delete a user profile.
 
