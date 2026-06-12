@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import engine, Base
 from app.routers import users
@@ -20,6 +21,7 @@ app = FastAPI(
     version="0.4.0",
     lifespan=lifespan,
 )
+Instrumentator().instrument(app).expose(app)
 
 app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 
