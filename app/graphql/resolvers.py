@@ -112,8 +112,20 @@ class Mutation:
     def create_user(
         self, info: strawberry.types.Info, input: UserCreateInput  # noqa: A002
     ) -> UserType:
-        """Create a new user profile."""
+        """Create a new user profile, or link an existing one by email."""
         db: Session = info.context["db"]
+
+        existing = db.query(User).filter(User.email == input.email).first()
+        if existing:
+            existing.keycloak_id = input.keycloak_id
+            existing.full_name = input.full_name
+            if input.phone is not None:
+                existing.phone = input.phone
+            if input.default_address is not None:
+                existing.default_address = input.default_address
+            db.commit()
+            db.refresh(existing)
+            return _model_to_type(existing)
 
         new_user = User(
             keycloak_id=input.keycloak_id,
