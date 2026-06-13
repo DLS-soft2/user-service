@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 
-from app.database import engine, Base
 from app.routers import users
 from app.graphql.schema import graphql_router
 
@@ -11,7 +10,6 @@ from app.graphql.schema import graphql_router
 @asynccontextmanager
 async def lifespan(_application: FastAPI):
     """Startup and shutdown logic for the application."""
-    Base.metadata.create_all(bind=engine)
     yield
 
 
